@@ -10,7 +10,6 @@ ENDPOINTS = {
 	'sandbox' : 'https://api.sandbox.namecheap.com/xml.response', 
 	'production' : 'https://api.namecheap.com/xml.response',
 }
-DEBUG = True
 NAMESPACE = "http://api.namecheap.com/xml.response"
 
 class ApiError(Exception):
@@ -21,12 +20,46 @@ class ApiError(Exception):
 
 class Api(object):
 	# Follows API spec capitalization in variable names for consistency.
-	def __init__(self, ApiUser, ApiKey, UserName, ClientIP, is_sandbox = True):
+	def __init__(self, ApiUser, ApiKey, UserName, ClientIP, sandbox = True, debug = True):
 		self.ApiUser = ApiUser
 		self.ApiKey = ApiKey
 		self.UserName = UserName
 		self.ClientIP = ClientIP
-		self.endpoint = ENDPOINTS['sandbox' if is_sandbox else 'production']
+		self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
+		self.debug = debug
+
+	def domains_create(self, DomainName, FirstName, LastName, 
+		Address1, City, StateProvince, PostalCode, Country, Phone, 
+		EmailAddress, Address2 = None, years = 1):
+		"""
+		Registers a domain name with the given contact info.
+		Example of a working phone number: +81.123123123
+
+		For simplicity assumes one person acts as all contact types."""
+
+		contact_types = ['Registrant', 'Tech', 'Admin', 'AuxBilling']
+
+		extra_payload = {
+			'DomainName' : DomainName,
+			'years' : years
+		}
+
+		for contact_type in contact_types:
+			extra_payload.update({
+				'%sFirstName' % contact_type : FirstName,
+				'%sLastName' % contact_type : LastName,
+				'%sAddress1' % contact_type : Address1,
+				'%sCity' % contact_type : City,
+				'%sStateProvince' % contact_type : StateProvince,
+				'%sPostalCode' % contact_type : PostalCode,
+				'%sCountry' % contact_type : Country,
+				'%sPhone' % contact_type : Phone,
+				'%sEmailAddress' % contact_type : EmailAddress,
+			})
+			if Address2:
+				extra_payload['%sAddress2' % contact_type] = Address2
+
+		self._call('namecheap.domains.create', extra_payload)		
 
 	def _payload(self, Command, extra_payload = {}):
 		"""Make dictionary for passing to requests.get"""
@@ -43,7 +76,7 @@ class Api(object):
 	def _fetch_xml(self, payload):
 		"""Make network call and return parsed XML element"""
 		r = requests.post(self.endpoint, params=payload)
-		if DEBUG:
+		if self.debug:
 			print "--- Request ---"
 			print r.url
 			print "--- Response ---"
