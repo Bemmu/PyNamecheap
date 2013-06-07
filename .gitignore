@@ -1,3 +1,5 @@
+credentials.py
+
 *.py[cod]
 
 # C extensions
