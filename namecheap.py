@@ -128,6 +128,13 @@ class Api(object):
 			else:
 				return self.results[self.i]				
 
+	def domains_dns_setDefault(self, domain):
+		sld, tld = domain.split(".")
+		self._call("namecheap.domains.dns.setDefault", {
+			'SLD' : sld,
+			'TLD' : tld
+		})
+
 	def domains_check(self, domains):
 		"""Checks the availability of domains.
 

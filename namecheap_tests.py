@@ -3,7 +3,7 @@
 import sys
 print sys.path
 
-from namecheap import Api
+from namecheap import Api, ApiError
 from nose.tools import * # pip install nose
 
 api_key = '' # You create this on Namecheap site
@@ -48,10 +48,25 @@ def test_register_domain():
 		Phone = '+81.123123123',
 		EmailAddress = 'jack.trotter@example.com'
 	)
+	return domain_name
 
 def test_domains_getList():
 	api = Api(username, api_key, username, ip_address, sandbox = True)
 	api.domains_getList()
+
+@raises(ApiError)
+def test_domains_dns_setDefault_on_nonexisting_domain():
+	api = Api(username, api_key, username, ip_address, sandbox = True)
+
+	domain_name = random_domain_name()
+
+	# This should fail because the domain does not exist
+	api.domains_dns_setDefault(domain_name)	
+
+def test_domains_dns_setDefault_on_existing_domain():
+	api = Api(username, api_key, username, ip_address, sandbox = True)
+	domain_name = test_register_domain()
+	api.domains_dns_setDefault(domain_name)	
 
 def test_domains_getContacts():
 	# How would I test for this? This needs a known registered

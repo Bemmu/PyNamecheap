@@ -8,6 +8,5 @@ Supports:
  - Checking domain name availability
  - Listing domains you have registered
  - Getting contact information for a domain
+ - Setting DNS info to default values
 
-Planned next:
- - Improving tests
