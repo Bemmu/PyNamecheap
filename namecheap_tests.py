@@ -1,8 +1,4 @@
 # Run "nosetests" on command line to run these.
-
-import sys
-print sys.path
-
 from namecheap import Api, ApiError
 from nose.tools import * # pip install nose
 
@@ -73,3 +69,35 @@ def test_domains_getContacts():
 	# domain to get the contact info for, but in sandbox won't
 	# have any.
 	pass
+
+def test_domains_dns_setHosts():
+	api = Api(username, api_key, username, ip_address, sandbox = True)
+	domain_name = test_register_domain()
+	api.domains_dns_setHosts(
+		domain_name,
+		[{
+			'HostName' : '@',
+			'RecordType' : 'URL',
+			'Address' : 'http://news.ycombinator.com',
+			'MXPref' : '10',
+			'TTL' : '100'
+		}]
+	)
+
+def test_list_of_dictionaries_to_numbered_payload():
+	x = [
+		{'foo' : 'bar', 'cat' : 'purr'},
+		{'foo' : 'buz'},
+		{'cat' : 'meow'}
+	]
+
+	result = Api._list_of_dictionaries_to_numbered_payload(x)
+
+	expected_result = {
+		'foo1' : 'bar',
+		'cat1' : 'purr',
+		'foo2' : 'buz',
+		'cat3' : 'meow'
+	}
+
+	assert_equal(result, expected_result)

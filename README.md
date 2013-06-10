@@ -9,4 +9,5 @@ Supports:
  - Listing domains you have registered
  - Getting contact information for a domain
  - Setting DNS info to default values
+ - Set DNS host records
 

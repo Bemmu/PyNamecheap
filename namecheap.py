@@ -164,6 +164,31 @@ class Api(object):
 	def _tag_without_namespace(cls, element):
 		return element.tag.replace("{%s}" % NAMESPACE, "")
 
+	@classmethod
+	def _list_of_dictionaries_to_numbered_payload(cls, l):
+		"""
+		[
+			{'foo' : 'bar', 'cat' : 'purr'},
+			{'foo' : 'buz'},
+			{'cat' : 'meow'}
+		]
+		
+		becomes
+		
+		{
+			'foo1' : 'bar',
+			'cat1' : 'purr',
+			'foo2' : 'buz',
+			'cat3' : 'meow'
+		}
+		"""
+		return dict(sum([
+			[(k+str(i+1),v) for k,v in d.items()] \
+			for i,d in enumerate(l)
+		], []))
+
+#y = [dict([(k+str(i+1),v) for k,v in d.items()]) for i,d in enumerate(l)]
+
 	def domains_getContacts(self, DomainName):
 		"""Gets contact information for the requested domain. 
 		There are many categories of contact info, such as admin and billing.
@@ -184,6 +209,29 @@ class Api(object):
 				fields_for_one_contact_type[self._tag_without_namespace(contact_detail)] = contact_detail.text
 			results[self._tag_without_namespace(contact_type)] = fields_for_one_contact_type
 		return results
+
+	def domains_dns_setHosts(self, domain, host_records):
+		"""Sets the DNS host records for a domain.
+
+		Example:
+
+		api.domains_dns_setHosts('example.com', [
+			{
+				'HostName' : '@',
+				'RecordType' : 'URL',
+				'Address' : 'http://news.ycombinator.com',
+				'MXPref' : '10',
+				'TTL' : '100'
+			}
+		])"""
+
+		extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records)
+		sld, tld = domain.split(".")
+		extra_payload.update({
+			'SLD' : sld,
+			'TLD' : tld
+		})
+		self._call("namecheap.domains.dns.setHosts", extra_payload)
 
 	def domains_getList(self, ListType = None, SearchTerm = None, PageSize = None, SortBy = None):
 		"""Returns an iterable of dicts. Each dict represents one
