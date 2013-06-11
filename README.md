@@ -17,7 +17,7 @@ The API has two environments, production and sandbox. Since this API will spend 
 
 After you have an account, go to "manage profile".
 
-![Profile](https://raw.github.com/Bemmu/PyNamecheap/master/img/apimenu.png "Profile")
+![Profile](https://raw.github.com/Bemmu/PyNamecheap/master/img/profile.png "Profile")
 
 From there, select "API Access" menu.
 
