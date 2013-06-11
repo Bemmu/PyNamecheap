@@ -55,6 +55,15 @@ Unfortunately you need a bunch of contact details to register a domain, so it is
 
 This call should succeed in the sandbox, but if you use the API to check whether this domain is available after registering it, the availability will not change. This is normal.
 
+### How to check if a domain name is available
+
+The domains_check method returns True if the domain is available.
+
+    api.domains_check(domain_name)
+
+You can also pass a list of domain names, in which case it does a batch check for all and returns a dictionary of the answers.
+You should probably not be writing a mass domain checking tool using this, it is intended to be used before registering a domain.
+
 ### More
 
 Look at namecheap_tests.py to see more examples of things you can do.
