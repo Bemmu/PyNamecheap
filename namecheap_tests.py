@@ -84,6 +84,36 @@ def test_domains_dns_setHosts():
 		}]
 	)
 
+def test_domains_dns_getHosts():
+	api = Api(username, api_key, username, ip_address, sandbox = True)
+	domain_name = test_register_domain()
+	api.domains_dns_setHosts(
+		domain_name,
+		[{
+			'HostName' : '@',
+			'RecordType' : 'URL',
+			'Address' : 'http://news.ycombinator.com',
+			'MXPref' : '10',
+			'TTL' : '100'
+		},
+		{
+			'HostName' : '*',
+			'RecordType' : 'A',
+			'Address' : '1.2.3.4',
+			'MXPref' : '10',
+			'TTL' : '1800'
+		}]
+	)
+
+	hosts = api.domains_dns_getHosts(domain_name)
+
+	# these might change
+	del hosts[0]['HostId'] 
+	del hosts[1]['HostId'] 
+
+	expected_result = [{'Name': '*', 'Address': '1.2.3.4', 'TTL': '1800', 'Type': 'A', 'MXPref': '10'}, {'Name': '@', 'Address': 'http://news.ycombinator.com', 'TTL': '100', 'Type': 'URL', 'MXPref': '10'}]
+	assert_equal(hosts, expected_result)
+
 def test_list_of_dictionaries_to_numbered_payload():
 	x = [
 		{'foo' : 'bar', 'cat' : 'purr'},

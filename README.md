@@ -2,8 +2,9 @@ PyNamecheap
 ===========
 
 Namecheap API client in Python.
+API itself is documented at http://developer.namecheap.com/docs/
 
-Supports:
+This client supports:
  - Registering a domain
  - Checking domain name availability
  - Listing domains you have registered

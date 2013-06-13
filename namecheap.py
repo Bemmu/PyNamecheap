@@ -233,6 +233,21 @@ class Api(object):
 		})
 		self._call("namecheap.domains.dns.setHosts", extra_payload)
 
+	def domains_dns_getHosts(self, domain):
+		"""Retrieves DNS host record settings. Note that the key names are different from those
+		you use when setting the host records."""
+		sld, tld = domain.split(".")
+		extra_payload = {
+			'SLD' : sld,
+			'TLD' : tld
+		}
+		xml = self._call("namecheap.domains.dns.getHosts", extra_payload)
+		xpath = './/{%(ns)s}CommandResponse/{%(ns)s}DomainDNSGetHostsResult/*' % {'ns' : NAMESPACE}
+		results = []
+		for host in xml.findall(xpath):
+			results.append(host.attrib)
+		return results
+
 	def domains_getList(self, ListType = None, SearchTerm = None, PageSize = None, SortBy = None):
 		"""Returns an iterable of dicts. Each dict represents one
 		domain name the user has registered, for example
