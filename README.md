@@ -1,7 +1,7 @@
-PyNamecheap
+Namecheap API for Python
 ===========
 
-Namecheap API client in Python.
+PyNamecheap is a Namecheap API client in Python.
 API itself is documented at http://developer.namecheap.com/docs/
 
 This client supports:
