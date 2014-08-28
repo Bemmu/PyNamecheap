@@ -1,5 +1,8 @@
+import sys
 import requests # pip install requests
 from xml.etree.ElementTree import fromstring
+
+inPy3k = sys.version_info[0] == 3
 
 # http://developer.namecheap.com/docs/doku.php?id=overview:2.environments
 ENDPOINTS = {
@@ -7,7 +10,7 @@ ENDPOINTS = {
 	# 1) browse to http://www.sandbox.namecheap.com/
 	# 2) create account, my account > manage profile > api access > enable API
 	# 3) add your IP address to whitelist
-	'sandbox' : 'https://api.sandbox.namecheap.com/xml.response', 
+	'sandbox' : 'https://api.sandbox.namecheap.com/xml.response',
 	'production' : 'https://api.namecheap.com/xml.response',
 }
 NAMESPACE = "http://api.namecheap.com/xml.response"
@@ -15,8 +18,8 @@ NAMESPACE = "http://api.namecheap.com/xml.response"
 class ApiError(Exception):
 	def __init__(self, number, text):
 		Exception.__init__(self, '%s - %s' % (number, text))
-	 	self.number = number
-	 	self.text = text
+		self.number = number
+		self.text = text
 
 class Api(object):
 	# Follows API spec capitalization in variable names for consistency.
@@ -28,8 +31,8 @@ class Api(object):
 		self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
 		self.debug = debug
 
-	def domains_create(self, DomainName, FirstName, LastName, 
-		Address1, City, StateProvince, PostalCode, Country, Phone, 
+	def domains_create(self, DomainName, FirstName, LastName,
+		Address1, City, StateProvince, PostalCode, Country, Phone,
 		EmailAddress, Address2 = None, years = 1):
 		"""
 		Registers a domain name with the given contact info.
@@ -59,7 +62,7 @@ class Api(object):
 			if Address2:
 				extra_payload['%sAddress2' % contact_type] = Address2
 
-		self._call('namecheap.domains.create', extra_payload)		
+		self._call('namecheap.domains.create', extra_payload)
 
 	def _payload(self, Command, extra_payload = {}):
 		"""Make dictionary for passing to requests.get"""
@@ -77,14 +80,14 @@ class Api(object):
 		"""Make network call and return parsed XML element"""
 		r = requests.post(self.endpoint, params=payload)
 		if self.debug:
-			print "--- Request ---"
-			print r.url
-			print "--- Response ---"
-			print r.text
+			print("--- Request ---")
+			print(r.url)
+			print("--- Response ---")
+			print(r.text)
 		xml = fromstring(r.text)
 
 		if xml.attrib['Status'] == 'ERROR':
-			# Response namespace must be prepended to tag names.			
+			# Response namespace must be prepended to tag names.
 			xpath = './/{%(ns)s}Errors/{%(ns)s}Error' % {'ns' : NAMESPACE}
 			error = xml.find(xpath)
 			raise ApiError(error.attrib['Number'], error.text)
@@ -126,7 +129,7 @@ class Api(object):
 			if self.i >= len(self.results):
 				raise StopIteration
 			else:
-				return self.results[self.i]				
+				return self.results[self.i]
 
 	def domains_dns_setDefault(self, domain):
 		sld, tld = domain.split(".")
@@ -149,8 +152,12 @@ class Api(object):
 		"""
 
 		# For convenience, allow a single domain to be given
-		if isinstance(domains, basestring):
-			return self.domains_check([domains]).items()[0][1]
+		if not inPy3k:
+			if isinstance(domains, basestring):
+				return self.domains_check([domains]).items()[0][1]
+		else:
+			if isinstance(domains, str):
+				return list(self.domains_check([domains]).items())[0][1]
 
 		extra_payload = {'DomainList' : ",".join(domains)}
 		xml = self._call('namecheap.domains.check', extra_payload)
@@ -172,9 +179,9 @@ class Api(object):
 			{'foo' : 'buz'},
 			{'cat' : 'meow'}
 		]
-		
+
 		becomes
-		
+
 		{
 			'foo1' : 'bar',
 			'cat1' : 'purr',
@@ -190,7 +197,7 @@ class Api(object):
 #y = [dict([(k+str(i+1),v) for k,v in d.items()]) for i,d in enumerate(l)]
 
 	def domains_getContacts(self, DomainName):
-		"""Gets contact information for the requested domain. 
+		"""Gets contact information for the requested domain.
 		There are many categories of contact info, such as admin and billing.
 
 		The returned data is like:
@@ -252,14 +259,14 @@ class Api(object):
 		"""Returns an iterable of dicts. Each dict represents one
 		domain name the user has registered, for example
 		{
-			'Name': 'coolestfriends.com', 
-			'Created': '04/11/2012', 
-			'Expires': '04/11/2018', 
-			'ID': '8385859', 
-			'AutoRenew': 'false', 
-			'IsLocked': 'false', 
-			'User': 'Bemmu', 
-			'IsExpired': 'false', 
+			'Name': 'coolestfriends.com',
+			'Created': '04/11/2012',
+			'Expires': '04/11/2018',
+			'ID': '8385859',
+			'AutoRenew': 'false',
+			'IsLocked': 'false',
+			'User': 'Bemmu',
+			'IsExpired': 'false',
 			'WhoisGuard': 'NOTPRESENT'
 		}
 		"""
@@ -274,4 +281,3 @@ class Api(object):
 		if SortBy: extra_payload['SortBy'] = SortBy
 		payload = self._payload('namecheap.domains.getList', extra_payload)
 		return self.LazyGetListIterator(self, payload)
- 
