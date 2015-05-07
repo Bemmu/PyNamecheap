@@ -84,6 +84,22 @@ def test_domains_dns_setHosts():
 		}]
 	)
 
+#
+# I wasn't able to get this to work on any public name servers that I tried
+# including the ones used in their own example:
+#   dns1.name-servers.com
+#   dns2.name-server.com
+# Using my own Amazon Route53 name servers the test works fine but I didn't
+# want to embed my own servers
+# Adjust the name servers below to your own and uncomment the test to run
+
+#def test_domains_dns_setCustom():
+#	api = Api(username, api_key, username, ip_address, sandbox = True)
+#	domain_name = test_register_domain()
+#	result = api.domains_dns_setCustom(
+#		domain_name, { 'Nameservers' : 'ns1.google.com,ns2.google.com' }
+#	)
+
 def test_domains_dns_getHosts():
 	api = Api(username, api_key, username, ip_address, sandbox = True)
 	domain_name = test_register_domain()

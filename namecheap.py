@@ -240,6 +240,19 @@ class Api(object):
 		})
 		self._call("namecheap.domains.dns.setHosts", extra_payload)
 
+	def domains_dns_setCustom(self, domain, host_records):
+		"""Sets the domain to use the supplied set of nameservers.
+
+		Example:
+
+		api.domains_dns_setCustom('example.com', { 'Nameservers' : 'ns1.example.com,ns2.example.com' })"""
+
+		extra_payload = host_records
+		sld, tld = domain.split(".")
+		extra_payload['SLD'] = sld
+		extra_payload['TLD'] = tld
+		self._call("namecheap.domains.dns.setCustom", extra_payload)
+
 	def domains_dns_getHosts(self, domain):
 		"""Retrieves DNS host record settings. Note that the key names are different from those
 		you use when setting the host records."""
