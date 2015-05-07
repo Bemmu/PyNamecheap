@@ -111,7 +111,7 @@ def test_domains_dns_getHosts():
 	del hosts[0]['HostId'] 
 	del hosts[1]['HostId'] 
 
-	expected_result = [{'Name': '*', 'Address': '1.2.3.4', 'TTL': '1800', 'Type': 'A', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}, { 'Name': '@', 'Address': 'http://news.ycombinator.com', 'TTL': '100', 'Type': 'URL', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}]
+	expected_result = [{'Name': '*', 'Address': '1.2.3.4', 'TTL': '1800', 'Type': 'A', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}, {'Name': '@', 'Address': 'http://news.ycombinator.com', 'TTL': '100', 'Type': 'URL', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}]
 	assert_equal(hosts, expected_result)
 
 def test_list_of_dictionaries_to_numbered_payload():
