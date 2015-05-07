@@ -84,6 +84,13 @@ def test_domains_dns_setHosts():
 		}]
 	)
 
+#def test_domains_dns_setCustom():
+#	api = Api(username, api_key, username, ip_address, sandbox = True)
+#	domain_name = test_register_domain()
+#	result = api.domains_dns_setCustom(
+#		domain_name, { 'Nameservers' : 'ns1.google.com,ns2.google.com' }
+#	)
+
 def test_domains_dns_getHosts():
 	api = Api(username, api_key, username, ip_address, sandbox = True)
 	domain_name = test_register_domain()
