@@ -133,6 +133,7 @@ class Api(object):
 			else:
 				return self.results[self.i]
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
 	def domains_dns_setDefault(self, domain):
 		sld, tld = domain.split(".")
 		self._call("namecheap.domains.dns.setDefault", {
