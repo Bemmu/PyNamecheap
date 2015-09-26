@@ -246,6 +246,7 @@ class Api(object):
 		})
 		self._call("namecheap.domains.dns.setHosts", extra_payload)
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/set-custom.aspx
 	def domains_dns_setCustom(self, domain, host_records):
 		"""Sets the domain to use the supplied set of nameservers.
 
