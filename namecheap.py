@@ -222,6 +222,7 @@ class Api(object):
 			results[self._tag_without_namespace(contact_type)] = fields_for_one_contact_type
 		return results
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/set-hosts.aspx
 	def domains_dns_setHosts(self, domain, host_records):
 		"""Sets the DNS host records for a domain.
 
