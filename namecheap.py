@@ -32,6 +32,7 @@ class Api(object):
 		self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
 		self.debug = debug
 
+	# https://www.namecheap.com/support/api/methods/domains/create.aspx
 	def domains_create(self, DomainName, FirstName, LastName,
 		Address1, City, StateProvince, PostalCode, Country, Phone,
 		EmailAddress, Address2 = None, years = 1):
