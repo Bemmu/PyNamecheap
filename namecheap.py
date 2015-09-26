@@ -15,6 +15,7 @@ ENDPOINTS = {
 }
 NAMESPACE = "http://api.namecheap.com/xml.response"
 
+# https://www.namecheap.com/support/api/error-codes.aspx
 class ApiError(Exception):
 	def __init__(self, number, text):
 		Exception.__init__(self, '%s - %s' % (number, text))
