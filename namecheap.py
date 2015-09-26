@@ -200,6 +200,7 @@ class Api(object):
 
 #y = [dict([(k+str(i+1),v) for k,v in d.items()]) for i,d in enumerate(l)]
 
+	# https://www.namecheap.com/support/api/methods/domains/get-contacts.aspx
 	def domains_getContacts(self, DomainName):
 		"""Gets contact information for the requested domain.
 		There are many categories of contact info, such as admin and billing.
