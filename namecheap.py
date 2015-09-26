@@ -141,6 +141,7 @@ class Api(object):
 			'TLD' : tld
 		})
 
+	# https://www.namecheap.com/support/api/methods/domains/check.aspx
 	def domains_check(self, domains):
 		"""Checks the availability of domains.
 
