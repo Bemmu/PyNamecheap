@@ -260,6 +260,7 @@ class Api(object):
 		extra_payload['TLD'] = tld
 		self._call("namecheap.domains.dns.setCustom", extra_payload)
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/get-hosts.aspx
 	def domains_dns_getHosts(self, domain):
 		"""Retrieves DNS host record settings. Note that the key names are different from those
 		you use when setting the host records."""
