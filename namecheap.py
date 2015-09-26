@@ -276,6 +276,7 @@ class Api(object):
 			results.append(host.attrib)
 		return results
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/get-list.aspx
 	def domains_getList(self, ListType = None, SearchTerm = None, PageSize = None, SortBy = None):
 		"""Returns an iterable of dicts. Each dict represents one
 		domain name the user has registered, for example
