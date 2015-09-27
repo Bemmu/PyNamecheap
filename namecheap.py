@@ -15,6 +15,7 @@ ENDPOINTS = {
 }
 NAMESPACE = "http://api.namecheap.com/xml.response"
 
+# https://www.namecheap.com/support/api/error-codes.aspx
 class ApiError(Exception):
 	def __init__(self, number, text):
 		Exception.__init__(self, '%s - %s' % (number, text))
@@ -31,6 +32,7 @@ class Api(object):
 		self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
 		self.debug = debug
 
+	# https://www.namecheap.com/support/api/methods/domains/create.aspx
 	def domains_create(self, DomainName, FirstName, LastName,
 		Address1, City, StateProvince, PostalCode, Country, Phone,
 		EmailAddress, Address2 = None, years = 1):
@@ -131,6 +133,7 @@ class Api(object):
 			else:
 				return self.results[self.i]
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
 	def domains_dns_setDefault(self, domain):
 		sld, tld = domain.split(".")
 		self._call("namecheap.domains.dns.setDefault", {
@@ -138,6 +141,7 @@ class Api(object):
 			'TLD' : tld
 		})
 
+	# https://www.namecheap.com/support/api/methods/domains/check.aspx
 	def domains_check(self, domains):
 		"""Checks the availability of domains.
 
@@ -196,6 +200,7 @@ class Api(object):
 
 #y = [dict([(k+str(i+1),v) for k,v in d.items()]) for i,d in enumerate(l)]
 
+	# https://www.namecheap.com/support/api/methods/domains/get-contacts.aspx
 	def domains_getContacts(self, DomainName):
 		"""Gets contact information for the requested domain.
 		There are many categories of contact info, such as admin and billing.
@@ -217,6 +222,7 @@ class Api(object):
 			results[self._tag_without_namespace(contact_type)] = fields_for_one_contact_type
 		return results
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/set-hosts.aspx
 	def domains_dns_setHosts(self, domain, host_records):
 		"""Sets the DNS host records for a domain.
 
@@ -240,6 +246,7 @@ class Api(object):
 		})
 		self._call("namecheap.domains.dns.setHosts", extra_payload)
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/set-custom.aspx
 	def domains_dns_setCustom(self, domain, host_records):
 		"""Sets the domain to use the supplied set of nameservers.
 
@@ -253,6 +260,7 @@ class Api(object):
 		extra_payload['TLD'] = tld
 		self._call("namecheap.domains.dns.setCustom", extra_payload)
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/get-hosts.aspx
 	def domains_dns_getHosts(self, domain):
 		"""Retrieves DNS host record settings. Note that the key names are different from those
 		you use when setting the host records."""
@@ -268,6 +276,7 @@ class Api(object):
 			results.append(host.attrib)
 		return results
 
+	# https://www.namecheap.com/support/api/methods/domains-dns/get-list.aspx
 	def domains_getList(self, ListType = None, SearchTerm = None, PageSize = None, SortBy = None):
 		"""Returns an iterable of dicts. Each dict represents one
 		domain name the user has registered, for example
