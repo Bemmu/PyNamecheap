@@ -16,11 +16,11 @@ This client supports:
 
 The API has two environments, production and sandbox. Since this API will spend real money when registering domains, start with the sandbox by going to http://www.sandbox.namecheap.com/ and creating an account. Accounts between production and sandbox are different, so even if you already have a Namecheap account you will need a new one.
 
-After you have an account, go to "manage profile".
+After you have an account, go to "Profile".
 
 ![Profile](img/profile.png "Profile")
 
-From there, select "API Access" menu.
+From there, select the "Profile" menu again, then "Tools". Scroll to the bottom of the page to the "Business & Dev Tools" and select "Manage" on the "Namecheap API Access" section.
 
 ![API menu](img/apimenu.png "API menu")
 
