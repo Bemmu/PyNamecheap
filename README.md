@@ -18,15 +18,15 @@ The API has two environments, production and sandbox. Since this API will spend 
 
 After you have an account, go to "manage profile".
 
-![Profile](https://raw.github.com/Bemmu/PyNamecheap/master/img/profile.png "Profile")
+![Profile](img/profile.png "Profile")
 
 From there, select "API Access" menu.
 
-![API menu](https://raw.github.com/Bemmu/PyNamecheap/master/img/apimenu.png "API menu")
+![API menu](img/apimenu.png "API menu")
 
 You'll get to your credentials page. From here you need to take note of your api key, username and add your IP to the whitelist of IP addresses that are allowed to access the account. You can check your public IP by searching "what is my ip" on Google and add it here. It might take some time before it actually starts working, so don't panic if API access doesn't work at first.
 
-![Credentials](https://raw.github.com/Bemmu/PyNamecheap/master/img/credentials.png "Credentials")
+![Credentials](img/credentials.png "Credentials")
 
 ### How to access the API from Python
 
