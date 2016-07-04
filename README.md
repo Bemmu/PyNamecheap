@@ -16,17 +16,17 @@ This client supports:
 
 The API has two environments, production and sandbox. Since this API will spend real money when registering domains, start with the sandbox by going to http://www.sandbox.namecheap.com/ and creating an account. Accounts between production and sandbox are different, so even if you already have a Namecheap account you will need a new one.
 
-After you have an account, go to "manage profile".
+After you have an account, go to "Profile".
 
-![Profile](https://raw.github.com/Bemmu/PyNamecheap/master/img/profile.png "Profile")
+![Profile](img/profile.png "Profile")
 
-From there, select "API Access" menu.
+From there, select the "Profile" menu again, then "Tools". Scroll to the bottom of the page to the "Business & Dev Tools" and select "Manage" on the "Namecheap API Access" section.
 
-![API menu](https://raw.github.com/Bemmu/PyNamecheap/master/img/apimenu.png "API menu")
+![API menu](img/apimenu.png "API menu")
 
 You'll get to your credentials page. From here you need to take note of your api key, username and add your IP to the whitelist of IP addresses that are allowed to access the account. You can check your public IP by searching "what is my ip" on Google and add it here. It might take some time before it actually starts working, so don't panic if API access doesn't work at first.
 
-![Credentials](https://raw.github.com/Bemmu/PyNamecheap/master/img/credentials.png "Credentials")
+![Credentials](img/credentials.png "Credentials")
 
 ### How to access the API from Python
 
