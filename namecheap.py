@@ -278,6 +278,31 @@ class Api(object):
             results.append(host.attrib)
         return results
 
+    def domains_dns_addHost(self, domain, host_record):
+        """This method is absent in original API. The main idea is to let user add one record
+        while having zero knowledge about the others. Method gonna get full records list, add
+        single record and push it to the API.
+
+        Example:
+
+        api.domains_dns_setHosts('example.com', {
+            "HostName": "test",
+            "RecordType": "A",
+            "Address": "127.0.0.1",
+            "MXPref": 10,
+            "TTL": 1800
+        })
+        """
+        host_records_remote = self.domains_dns_getHosts(domain)
+        host_records_remote.append(host_record)
+        extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_remote)
+        sld, tld = domain.split(".")
+        extra_payload.update({
+            'SLD': sld,
+            'TLD': tld
+        })
+        self._call("namecheap.domains.dns.setHosts", extra_payload)
+
     # https://www.namecheap.com/support/api/methods/domains-dns/get-list.aspx
     def domains_getList(self, ListType=None, SearchTerm=None, PageSize=None, SortBy=None):
         """Returns an iterable of dicts. Each dict represents one
