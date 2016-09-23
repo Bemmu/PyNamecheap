@@ -285,17 +285,64 @@ class Api(object):
 
         Example:
 
-        api.domains_dns_setHosts('example.com', {
-            "HostName": "test",
+        api.domains_dns_addHost('example.com', {
             "RecordType": "A",
+            "HostName": "test",
             "Address": "127.0.0.1",
             "MXPref": 10,
             "TTL": 1800
         })
         """
         host_records_remote = self.domains_dns_getHosts(domain)
+
         host_records_remote.append(host_record)
+
         extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_remote)
+        sld, tld = domain.split(".")
+        extra_payload.update({
+            'SLD': sld,
+            'TLD': tld
+        })
+        self._call("namecheap.domains.dns.setHosts", extra_payload)
+
+    def domains_dns_delHost(self, domain, host_record):
+        """This method is absent in original API as well. It executes non-atomic
+        remove operation over the host record which has the following Type,
+        Hostname and Address.
+
+        Example:
+
+        api.domains_dns_delHost('example.com', {
+            "RecordType": "A",
+            "HostName": "test",
+            "Address": "127.0.0.1"
+        })
+        """
+        host_records_remote = self.domains_dns_getHosts(domain)
+
+        host_records_new = []
+        for r in host_records_remote:
+            cond_type = r["Type"] == host_record["RecordType"]
+            cond_name = r["Name"] == host_record["HostName"]
+            cond_addr = r["Address"] == host_record["Address"]
+
+            if cond_type and cond_name and cond_addr:
+                # skipping this record as it is the one we want to delete
+                pass
+            else:
+                host_records_new.append(r)
+
+        # Check that we delete not more than 1 record at a time
+        if len(host_records_remote) != len(host_records_new) + 1:
+            sys.stderr.write(
+                "Something went wrong while removing host record, delta > 1: %i -> %i, aborting API call.\n" % (
+                    len(host_records_remote),
+                    len(host_records_new)
+                )
+            )
+            return False
+
+        extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_new)
         sld, tld = domain.split(".")
         extra_payload.update({
             'SLD': sld,
