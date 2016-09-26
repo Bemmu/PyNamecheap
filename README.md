@@ -65,6 +65,44 @@ The domains_check method returns True if the domain is available.
 You can also pass a list of domain names, in which case it does a batch check for all and returns a dictionary of the answers.
 You should probably not be writing a mass domain checking tool using this, it is intended to be used before registering a domain.
 
+### Basic host records management
+
+Here's the example of simple DNS records management script:
+
+    #!/usr/bin/env python
+
+    """
+    Define variables regarding to your API account:
+      - api_key
+      - username
+      - ip_address
+    """
+
+    api = Api(username, api_key, username, ip_address, sandbox=False)
+
+    domain = "example.org"
+
+    # list domain records
+    api.domains_dns_getHosts(domain)
+
+    record = {
+        # required
+        "Type": "A",
+        "Name": "test1",
+        "Address": "127.0.0.1",
+
+        # optional
+        "TTL": "1800",
+        "MXPref": "10"
+    }
+
+    # add A "test1" record pointing to 127.0.0.1
+    api.domains_dns_addHost(domain, record)
+
+    # delete record we just created,
+    # selecting it by Name, Type and Address values
+    api.domains_dns_delHost(domain, record)
+
 ### More
 
 Look at namecheap_tests.py to see more examples of things you can do.
