@@ -65,7 +65,27 @@ The domains_check method returns True if the domain is available.
 You can also pass a list of domain names, in which case it does a batch check for all and returns a dictionary of the answers.
 You should probably not be writing a mass domain checking tool using this, it is intended to be used before registering a domain.
 
-### Basic host records management
+### CLI tool usage
+
+First, you need to edit `./credentials.py` file to provide API access for the script. The example is following:
+
+    #!/usr/bin/env python
+
+    api_key = '0123456789abcdef0123456789abcdef'
+    username = 'myusername'
+    ip_address = '10.0.0.1'
+
+Then you just call the script with desired arguments:
+
+    ./namecheap-api-cli --domain example.org --list
+
+    ./namecheap-api-cli --domain example.org --add --type "A" --name "test" --address "127.0.0.1" --ttl 300
+    ./namecheap-api-cli --domain example.org --add --type "CNAME" --name "alias-of-test" --address "test.example.org." --ttl 1800
+
+    ./namecheap-api-cli --domain example.org --delete --type "CNAME" --name "alias-of-test" --address "test.example.org."
+    ./namecheap-api-cli --domain example.org --delete --type "A" --name "test" --address "127.0.0.1"
+
+### Basic host records management code
 
 Here's the example of simple DNS records management script:
 
