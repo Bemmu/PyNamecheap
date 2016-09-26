@@ -12,11 +12,10 @@ try:
 except:
     pass
 
-
 def random_domain_name():
     import random
-    import time
-    domain_name = "%s%s.com" % (int(time.time()), random.randint(0, 10**16))
+    from time import gmtime, strftime
+    domain_name = "%s-%s.com" % (strftime("%Y%m%d-%H%M%S", gmtime()), random.randint(0, 10**16))
     return domain_name
 
 
@@ -137,7 +136,29 @@ def test_domains_dns_getHosts():
     del hosts[0]['HostId']
     del hosts[1]['HostId']
 
-    expected_result = [{'Name': '*', 'Address': '1.2.3.4', 'TTL': '1800', 'Type': 'A', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}, {'Name': '@', 'Address': 'http://news.ycombinator.com', 'TTL': '100', 'Type': 'URL', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}]
+    expected_result = [
+        {
+            'Name': '*',
+            'Address': '1.2.3.4',
+            'TTL': '1800',
+            'Type': 'A',
+            'MXPref': '10',
+            'AssociatedAppTitle': '',
+            'FriendlyName': '',
+            'IsActive': 'true',
+            'IsDDNSEnabled': 'false'
+        }, {
+            'Name': '@',
+            'Address': 'http://news.ycombinator.com',
+            'TTL': '100',
+            'Type': 'URL',
+            'MXPref': '10',
+            'AssociatedAppTitle': '',
+            'FriendlyName': '',
+            'IsActive': 'true',
+            'IsDDNSEnabled': 'false'
+        }
+    ]
     assert_equal(hosts, expected_result)
 
 
@@ -147,21 +168,18 @@ def test_domains_dns_addHost():
     api.domains_dns_setHosts(
         domain_name,
         [{
-            'Name': '@',
-            'Type': 'URL',
-            'Address': 'http://news.ycombinator.com',
-            'MXPref': '10',
-            'TTL': '100'
+            'HostName': '@',
+            'RecordType': 'URL',
+            'Address': 'http://news.ycombinator.com'
         }]
     )
     api.domains_dns_addHost(
         domain_name,
         {
-            'Name': '*',
+            'Name': 'test',
             'Type': 'A',
             'Address': '1.2.3.4',
-            'MXPref': '10',
-            'TTL': '1800'
+            'TTL': '100'
         }
     )
 
@@ -171,7 +189,29 @@ def test_domains_dns_addHost():
     del hosts[0]['HostId']
     del hosts[1]['HostId']
 
-    expected_result = [{'Name': '*', 'Address': '1.2.3.4', 'TTL': '1800', 'Type': 'A', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}, {'Name': '@', 'Address': 'http://news.ycombinator.com', 'TTL': '100', 'Type': 'URL', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}]
+    expected_result = [
+        {
+            'Name': 'test',
+            'Address': '1.2.3.4',
+            'TTL': '100',
+            'Type': 'A',
+            'MXPref': '10',
+            'AssociatedAppTitle': '',
+            'FriendlyName': '',
+            'IsActive': 'true',
+            'IsDDNSEnabled': 'false'
+        }, {
+            'Name': '@',
+            'Address': 'http://news.ycombinator.com',
+            'TTL': '1800',
+            'Type': 'URL',
+            'MXPref': '10',
+            'AssociatedAppTitle': '',
+            'FriendlyName': '',
+            'IsActive': 'true',
+            'IsDDNSEnabled': 'false'
+        }
+    ]
     assert_equal(hosts, expected_result)
 
 
@@ -181,23 +221,20 @@ def test_domains_dns_delHost():
     api.domains_dns_setHosts(
         domain_name,
         [{
-            'Name': '@',
-            'Type': 'URL',
+            'HostName': '@',
+            'RecordType': 'URL',
             'Address': 'http://news.ycombinator.com',
-            'MXPref': '10',
-            'TTL': '100'
+            'TTL': '200'
         }, {
-            'Name': '*',
-            'Type': 'A',
-            'Address': '1.2.3.4',
-            'MXPref': '10',
-            'TTL': '1800'
+            'HostName': 'test',
+            'RecordType': 'A',
+            'Address': '1.2.3.4'
         }]
     )
     api.domains_dns_delHost(
         domain_name,
         {
-            'Name': '*',
+            'Name': 'test',
             'Type': 'A',
             'Address': '1.2.3.4'
         }
@@ -208,7 +245,19 @@ def test_domains_dns_delHost():
     # these might change
     del hosts[0]['HostId']
 
-    expected_result = [{'Name': '@', 'Address': 'http://news.ycombinator.com', 'TTL': '100', 'Type': 'URL', 'MXPref': '10', 'AssociatedAppTitle': '', 'FriendlyName': '', 'IsActive': ''}]
+    expected_result = [
+        {
+            'Name': '@',
+            'Address': 'http://news.ycombinator.com',
+            'TTL': '200',
+            'Type': 'URL',
+            'MXPref': '10',
+            'AssociatedAppTitle': '',
+            'FriendlyName': '',
+            'IsActive': 'true',
+            'IsDDNSEnabled': 'false'
+        }
+    ]
     assert_equal(hosts, expected_result)
 
 
