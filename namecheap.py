@@ -202,6 +202,45 @@ class Api(object):
             [(k + str(i + 1), v) for k, v in d.items()] for i, d in enumerate(l)
         ], []))
 
+    @classmethod
+    def _elements_names_fix(self, host_record):
+        """This method converts received message to correct send format.
+
+        API answers you with this format:
+
+        {
+            'Name' : '@',
+            'Type' : 'URL',
+            'Address' : 'http://news.ycombinator.com',
+            'MXPref' : '10',
+            'TTL' : '100'
+        }
+
+        And you should convert it to this one in order to sync the records:
+
+        {
+            'HostName' : '@',
+            'RecordType' : 'URL',
+            'Address' : 'http://news.ycombinator.com',
+            'MXPref' : '10',
+            'TTL' : '100'
+        }
+        """
+
+        conversion_map = [
+            ("Name", "HostName"),
+            ("Type", "RecordType")
+        ]
+
+        for field in conversion_map:
+            # if source field exists
+            if field[0] in host_record:
+                # convert it to target field and delete old one
+                host_record[field[1]] = host_record[field[0]]
+                del(host_record[field[0]])
+
+        return host_record
+
     # https://www.namecheap.com/support/api/methods/domains/get-contacts.aspx
     def domains_getContacts(self, DomainName):
         """Gets contact information for the requested domain.
@@ -295,7 +334,12 @@ class Api(object):
         """
         host_records_remote = self.domains_dns_getHosts(domain)
 
+        print("Remote: %i" % len(host_records_remote))
+
         host_records_remote.append(host_record)
+        host_records_remote = [self._elements_names_fix(x) for x in host_records_remote]
+
+        print("To set: %i" % len(host_records_remote))
 
         extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_remote)
         sld, tld = domain.split(".")
@@ -320,10 +364,12 @@ class Api(object):
         """
         host_records_remote = self.domains_dns_getHosts(domain)
 
+        print("Remote: %i" % len(host_records_remote))
+
         host_records_new = []
         for r in host_records_remote:
-            cond_type = r["Type"] == host_record["RecordType"]
-            cond_name = r["Name"] == host_record["HostName"]
+            cond_type = r["Type"] == host_record["Type"]
+            cond_name = r["Name"] == host_record["Name"]
             cond_addr = r["Address"] == host_record["Address"]
 
             if cond_type and cond_name and cond_addr:
@@ -331,6 +377,10 @@ class Api(object):
                 pass
             else:
                 host_records_new.append(r)
+
+        host_records_new = [self._elements_names_fix(x) for x in host_records_new]
+
+        print("To set: %i" % len(host_records_new))
 
         # Check that we delete not more than 1 record at a time
         if len(host_records_remote) != len(host_records_new) + 1:

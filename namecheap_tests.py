@@ -147,8 +147,8 @@ def test_domains_dns_addHost():
     api.domains_dns_setHosts(
         domain_name,
         [{
-            'HostName': '@',
-            'RecordType': 'URL',
+            'Name': '@',
+            'Type': 'URL',
             'Address': 'http://news.ycombinator.com',
             'MXPref': '10',
             'TTL': '100'
@@ -157,8 +157,8 @@ def test_domains_dns_addHost():
     api.domains_dns_addHost(
         domain_name,
         {
-            'HostName': '*',
-            'RecordType': 'A',
+            'Name': '*',
+            'Type': 'A',
             'Address': '1.2.3.4',
             'MXPref': '10',
             'TTL': '1800'
@@ -181,14 +181,14 @@ def test_domains_dns_delHost():
     api.domains_dns_setHosts(
         domain_name,
         [{
-            'HostName': '@',
-            'RecordType': 'URL',
+            'Name': '@',
+            'Type': 'URL',
             'Address': 'http://news.ycombinator.com',
             'MXPref': '10',
             'TTL': '100'
         }, {
-            'HostName': '*',
-            'RecordType': 'A',
+            'Name': '*',
+            'Type': 'A',
             'Address': '1.2.3.4',
             'MXPref': '10',
             'TTL': '1800'
@@ -197,8 +197,8 @@ def test_domains_dns_delHost():
     api.domains_dns_delHost(
         domain_name,
         {
-            'HostName': '*',
-            'RecordType': 'A',
+            'Name': '*',
+            'Type': 'A',
             'Address': '1.2.3.4'
         }
     )
