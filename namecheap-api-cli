@@ -73,14 +73,13 @@ if args.add:
         args.address,
         args.ttl
     )
-
-if args.delete:
+elif args.delete:
     record_delete(
         args.name,
         args.address,
         args.type
     )
-
-if args.list:
+elif args.list:
     for line in list_records():
         print("\t%s \t%s\t%s -> %s" % (line["Type"], line["TTL"], line["Name"], line["Address"]))
+
