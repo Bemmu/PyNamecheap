@@ -215,6 +215,32 @@ def test_domains_dns_addHost():
     assert_equal(hosts, expected_result)
 
 
+def test_domains_dns_bulkAddHosts():
+    api = Api(username, api_key, username, ip_address, sandbox=True)
+    api.payload_limit = 3
+    domain_name = test_register_domain()
+    api.domains_dns_setHosts(
+        domain_name,
+        [{
+            'HostName': '@',
+            'RecordType': 'URL',
+            'Address': 'http://news.ycombinator.com'
+        }]
+    )
+    for i in range(1, 10):
+        api.domains_dns_addHost(
+            domain_name,
+            {'Name': "test" + str(i), 'Type': 'A', 'Address': '1.2.3.4', 'TTL': '60'}
+        )
+
+    hosts = api.domains_dns_getHosts(domain_name)
+
+    if len(hosts) == 10:
+        return True
+
+    return False
+
+
 def test_domains_dns_delHost():
     api = Api(username, api_key, username, ip_address, sandbox=True)
     domain_name = test_register_domain()

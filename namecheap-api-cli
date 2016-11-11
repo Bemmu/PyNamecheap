@@ -82,4 +82,3 @@ elif args.delete:
 elif args.list:
     for line in list_records():
         print("\t%s \t%s\t%s -> %s" % (line["Type"], line["TTL"], line["Name"], line["Address"]))
-
