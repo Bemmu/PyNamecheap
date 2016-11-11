@@ -33,6 +33,7 @@ class Api(object):
         self.ClientIP = ClientIP
         self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
         self.debug = debug
+        self.payload_limit = 10  # After hitting this lenght limit script will move payload from POST params to POST data
 
     # https://www.namecheap.com/support/api/methods/domains/create.aspx
     def domains_create(
@@ -72,7 +73,7 @@ class Api(object):
         self._call('namecheap.domains.create', extra_payload)
 
     def _payload(self, Command, extra_payload={}):
-        """Make dictionary for passing to requests.get"""
+        """Make dictionary for passing to requests.post"""
         payload = {
             'ApiUser': self.ApiUser,
             'ApiKey': self.ApiKey,
@@ -80,15 +81,23 @@ class Api(object):
             'ClientIP': self.ClientIP,
             'Command': Command,
         }
-        payload.update(extra_payload)
-        return payload
+        # Namecheap recommends to use HTTPPOST method when setting more than 10 hostnames
+        # https://www.namecheap.com/support/api/methods/domains-dns/set-hosts.aspx
+        if len(extra_payload) < self.payload_limit:
+            payload.update(extra_payload)
+            extra_payload = {}
+        return payload, extra_payload
 
-    def _fetch_xml(self, payload):
+    def _fetch_xml(self, payload, extra_payload):
         """Make network call and return parsed XML element"""
-        r = requests.post(self.endpoint, params=payload)
+        if extra_payload:
+            r = requests.post(self.endpoint, params=payload, data=extra_payload)
+        else:
+            r = requests.post(self.endpoint, params=payload)
         if self.debug:
             print("--- Request ---")
             print(r.url)
+            print(extra_payload)
             print("--- Response ---")
             print(r.text)
         xml = fromstring(r.text)
@@ -103,8 +112,8 @@ class Api(object):
 
     def _call(self, Command, extra_payload={}):
         """Call an API command"""
-        payload = self._payload(Command, extra_payload)
-        xml = self._fetch_xml(payload)
+        payload, extra_payload = self._payload(Command, extra_payload)
+        xml = self._fetch_xml(payload, extra_payload)
         return xml
 
     class LazyGetListIterator(object):
@@ -429,5 +438,5 @@ class Api(object):
             extra_payload['PageSize'] = PageSize
         if SortBy:
             extra_payload['SortBy'] = SortBy
-        payload = self._payload('namecheap.domains.getList', extra_payload)
+        payload, extra_payload = self._payload('namecheap.domains.getList', extra_payload)
         return self.LazyGetListIterator(self, payload)
