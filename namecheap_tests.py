@@ -53,7 +53,7 @@ def test_register_domain():
 
 def test_domains_getList():
     api = Api(username, api_key, username, ip_address, sandbox=True)
-    api.domains_getList()
+    iter(api.domains_getList())
 
 
 @raises(ApiError)

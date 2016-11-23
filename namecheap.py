@@ -88,7 +88,7 @@ class Api(object):
             extra_payload = {}
         return payload, extra_payload
 
-    def _fetch_xml(self, payload, extra_payload):
+    def _fetch_xml(self, payload, extra_payload = None):
         """Make network call and return parsed XML element"""
         if extra_payload:
             r = requests.post(self.endpoint, params=payload, data=extra_payload)
@@ -137,7 +137,7 @@ class Api(object):
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             self.i += 1
             if self.i >= len(self.results):
                 self._get_more_results()
@@ -146,6 +146,7 @@ class Api(object):
                 raise StopIteration
             else:
                 return self.results[self.i]
+        next = __next__
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
     def domains_dns_setDefault(self, domain):
