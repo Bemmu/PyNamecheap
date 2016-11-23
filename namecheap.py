@@ -88,7 +88,7 @@ class Api(object):
             extra_payload = {}
         return payload, extra_payload
 
-    def _fetch_xml(self, payload, extra_payload):
+    def _fetch_xml(self, payload, extra_payload = None):
         """Make network call and return parsed XML element"""
         if extra_payload:
             r = requests.post(self.endpoint, params=payload, data=extra_payload)
