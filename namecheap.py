@@ -137,7 +137,7 @@ class Api(object):
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             self.i += 1
             if self.i >= len(self.results):
                 self._get_more_results()
@@ -146,6 +146,7 @@ class Api(object):
                 raise StopIteration
             else:
                 return self.results[self.i]
+        next = __next__
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
     def domains_dns_setDefault(self, domain):
