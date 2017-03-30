@@ -9,7 +9,7 @@ def read(fname):
 
 
 setup(
-    name='namesilo',
+    name='namecheap',
     version='0.1.4',
     url='https://github.com/inomoz/PyNamecheap',
     license='MIT',
