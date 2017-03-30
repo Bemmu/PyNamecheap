@@ -11,12 +11,12 @@ def read(fname):
 setup(
     name='namesilo',
     version='0.1.4',
-    url='http://github.com/kolanos/namesilo',
+    url='https://github.com/inomoz/PyNamecheap',
     license='MIT',
     author='Bemmu Sepponen',
     author_email='me@bemmu.com',
     description='Namecheap API client in Python',
-    py_modules=['PyNamecheap'],
+    py_modules=['namecheap'],
     platforms='any',
     install_requires=['requests'],
     classifiers=[
