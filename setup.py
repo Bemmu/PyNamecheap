@@ -11,7 +11,7 @@ def read(fname):
 setup(
     name='PyNamecheap',
     version='0.0.1',
-    url='https://github.com/Bemmu/PyNamecheapp',
+    url='https://github.com/Bemmu/PyNamecheap',
     license='MIT',
     author='Bemmu Sepponen',
     author_email='me@bemmu.com',
