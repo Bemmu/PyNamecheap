@@ -40,7 +40,7 @@ class Api(object):
         self,
         DomainName, FirstName, LastName,
         Address1, City, StateProvince, PostalCode, Country, Phone,
-        EmailAddress, Address2=None, years=1
+        EmailAddress, Address2=None, years=1, WhoisGuard=False
     ):
         """
         Registers a domain name with the given contact info.
@@ -54,6 +54,12 @@ class Api(object):
             'DomainName': DomainName,
             'years': years
         }
+		
+        if WhoisGuard:
+            extra_payload.update({
+                'AddFreeWhoisguard': 'yes',
+                'WGEnabled': 'yes',
+            })
 
         for contact_type in contact_types:
             extra_payload.update({
