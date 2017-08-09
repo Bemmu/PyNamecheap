@@ -109,10 +109,10 @@ class Api(object):
         xml = fromstring(r.text)
 
         # Ensure that API response is in valid format, see: https://github.com/Bemmu/PyNamecheap/issues/8
-        if 'Status' not in xml.attrib:
+        if xml.get('Status') is None:
             # Here we provide 0 error code which is not present in official docs
             raise ApiError('0', 'Could not parse ApiResponse')
-        elif xml.attrib['Status'] == 'ERROR':
+        elif xml.get('Status') == 'ERROR':
             # Response namespace must be prepended to tag names.
             xpath = './/{%(ns)s}Errors/{%(ns)s}Error' % {'ns': NAMESPACE}
             error = xml.find(xpath)
