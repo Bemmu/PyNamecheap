@@ -131,6 +131,20 @@ Here's the example of simple DNS records management script:
     # selecting it by Name, Type and Address values
     api.domains_dns_delHost(domain, record)
 
+### Retry mechanism
+
+Sometimes you could face wrong API responses, which are related to server-side errors.
+
+Thanks to @gstein, we implemented retry mechanism, one could enable it by adding 2 parameters to Api instance:
+
+```
+api = Api(username, api_key, username, ip_address, sandbox=False,
+          attempts_count=3,
+          attempts_delay=0.1)
+```
+
+Values of 2 or 3 should do the thing.
+
 ### More
 
 Look at namecheap_tests.py to see more examples of things you can do.
