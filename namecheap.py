@@ -1,4 +1,5 @@
 import sys
+import time
 import requests  # pip install requests
 from xml.etree.ElementTree import fromstring
 
@@ -15,6 +16,10 @@ ENDPOINTS = {
 }
 NAMESPACE = "http://api.namecheap.com/xml.response"
 
+# default values for the retry mechanism
+DEFAULT_RETRY_COUNT = 0  # disabled
+DEFAULT_RETRY_DELAY = 0.1  # in seconds
+
 
 # https://www.namecheap.com/support/api/error-codes.aspx
 class ApiError(Exception):
@@ -26,7 +31,10 @@ class ApiError(Exception):
 
 class Api(object):
     # Follows API spec capitalization in variable names for consistency.
-    def __init__(self, ApiUser, ApiKey, UserName, ClientIP, sandbox=True, debug=True):
+    def __init__(self, ApiUser, ApiKey, UserName, ClientIP,
+                 sandbox=True, debug=True,
+                 retry_count=DEFAULT_RETRY_COUNT,
+                 retry_delay=DEFAULT_RETRY_DELAY):
         self.ApiUser = ApiUser
         self.ApiKey = ApiKey
         self.UserName = UserName
@@ -34,6 +42,8 @@ class Api(object):
         self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
         self.debug = debug
         self.payload_limit = 10  # After hitting this lenght limit script will move payload from POST params to POST data
+        self.retry_count = retry_count
+        self.retry_delay = retry_delay
 
     # https://www.namecheap.com/support/api/methods/domains/create.aspx
     def domains_create(
@@ -96,10 +106,22 @@ class Api(object):
 
     def _fetch_xml(self, payload, extra_payload = None):
         """Make network call and return parsed XML element"""
-        if extra_payload:
-            r = requests.post(self.endpoint, params=payload, data=extra_payload)
-        else:
-            r = requests.post(self.endpoint, params=payload)
+        retries_left = self.retry_count
+        while True:
+            if extra_payload:
+                r = requests.post(self.endpoint, params=payload, data=extra_payload)
+            else:
+                r = requests.post(self.endpoint, params=payload)
+            if 200 <= r.status_code <= 299:
+                break
+            if retries_left <= 0:
+                # Here we provide 0 error code which is not present in official docs
+                raise ApiError('0', 'Did not receive 200 (Ok) response')
+            if self.debug:
+                print('Received status %d ... retrying ...' % (r.status_code,))
+            time.sleep(self.retry_delay)
+            retries_left -= 1
+
         if self.debug:
             print("--- Request ---")
             print(r.url)
