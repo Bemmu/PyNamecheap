@@ -178,7 +178,7 @@ class Api(object):
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
     def domains_dns_setDefault(self, domain):
-        sld, tld = domain.split(".")
+        sld, tld = domain.split(".", 1)
         self._call("namecheap.domains.dns.setDefault", {
             'SLD': sld,
             'TLD': tld
@@ -318,7 +318,7 @@ class Api(object):
         ])"""
 
         extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records)
-        sld, tld = domain.split(".")
+        sld, tld = domain.split(".", 1)
         extra_payload.update({
             'SLD': sld,
             'TLD': tld
@@ -334,7 +334,7 @@ class Api(object):
         api.domains_dns_setCustom('example.com', { 'Nameservers' : 'ns1.example.com,ns2.example.com' })"""
 
         extra_payload = host_records
-        sld, tld = domain.split(".")
+        sld, tld = domain.split(".", 1)
         extra_payload['SLD'] = sld
         extra_payload['TLD'] = tld
         self._call("namecheap.domains.dns.setCustom", extra_payload)
@@ -343,7 +343,7 @@ class Api(object):
     def domains_dns_getHosts(self, domain):
         """Retrieves DNS host record settings. Note that the key names are different from those
         you use when setting the host records."""
-        sld, tld = domain.split(".")
+        sld, tld = domain.split(".", 1)
         extra_payload = {
             'SLD': sld,
             'TLD': tld
@@ -380,7 +380,7 @@ class Api(object):
         print("To set: %i" % len(host_records_remote))
 
         extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_remote)
-        sld, tld = domain.split(".")
+        sld, tld = domain.split(".", 1)
         extra_payload.update({
             'SLD': sld,
             'TLD': tld
@@ -431,7 +431,7 @@ class Api(object):
             return False
 
         extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_new)
-        sld, tld = domain.split(".")
+        sld, tld = domain.split(".", 1)
         extra_payload.update({
             'SLD': sld,
             'TLD': tld
