@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name='PyNamecheap',
-    version='0.0.2',
+    version='0.0.3',
     url='https://github.com/Bemmu/PyNamecheap',
     license='MIT',
     author='Bemmu Sepponen',
