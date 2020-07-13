@@ -2,7 +2,7 @@ Namecheap API for Python
 ===========
 
 PyNamecheap is a Namecheap API client in Python.
-API itself is documented at <http://developer.namecheap.com/docs/>
+API itself is documented at <https://www.namecheap.com/support/api/intro/>
 
 This client supports:
 -   Registering a domain
