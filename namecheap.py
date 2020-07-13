@@ -130,7 +130,7 @@ class Api(object):
             print(r.text)
         xml = fromstring(r.text)
 
-        if xml.attrib['Status'] == 'ERROR':
+        if xml.attrib['Status'].upper() == 'ERROR':
             # Response namespace must be prepended to tag names.
             xpath = './/{%(ns)s}Errors/{%(ns)s}Error' % {'ns': NAMESPACE}
             error = xml.find(xpath)
