@@ -147,4 +147,4 @@ Values of 2 or 3 should do the thing.
 
 ### More
 
-Look at namecheap_tests.py to see more examples of things you can do.
+Look at namecheap_tests.py and [the wiki](https://github.com/Bemmu/PyNamecheap/wiki)to see more examples of things you can do.
