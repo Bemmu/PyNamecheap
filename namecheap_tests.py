@@ -12,6 +12,11 @@ try:
 except:
     pass
 
+
+def is_true(val):
+    return val in ['true', True, 1, '1', 'yes', 'True', 'TRUE']
+
+
 def random_domain_name():
     import random
     from time import gmtime, strftime
@@ -36,7 +41,7 @@ def test_register_domain():
 
     # Try registering a random domain. Fails if exception raised.
     domain_name = random_domain_name()
-    api.domains_create(
+    res = api.domains_create(
         DomainName=domain_name,
         FirstName='Jack',
         LastName='Trotter',
@@ -48,6 +53,11 @@ def test_register_domain():
         Phone='+81.123123123',
         EmailAddress='jack.trotter@example.com'
     )
+    
+    assert_equal(res['Domain'], domain_name)
+    ok_(int(res['DomainID']) > 0)
+    ok_(int(res['TransactionID']) > 0)
+    ok_(is_true(res['Registered']))
     return domain_name
 
 
@@ -69,7 +79,9 @@ def test_domains_dns_setDefault_on_nonexisting_domain():
 def test_domains_dns_setDefault_on_existing_domain():
     api = Api(username, api_key, username, ip_address, sandbox=True)
     domain_name = test_register_domain()
-    api.domains_dns_setDefault(domain_name)
+    res = api.domains_dns_setDefault(domain_name)
+    assert_equal(res['Domain'], domain_name)
+    ok_(is_true(res['Updated']))
 
 
 def test_domains_getContacts():
@@ -82,7 +94,7 @@ def test_domains_getContacts():
 def test_domains_dns_setHosts():
     api = Api(username, api_key, username, ip_address, sandbox=True)
     domain_name = test_register_domain()
-    api.domains_dns_setHosts(
+    res = api.domains_dns_setHosts(
         domain_name,
         [{
             'HostName': '@',
@@ -92,6 +104,8 @@ def test_domains_dns_setHosts():
             'TTL': '100'
         }]
     )
+    assert_equal(res['Domain'], domain_name)
+    ok_(is_true(res['IsSuccess']))
 
 #
 # I wasn't able to get this to work on any public name servers that I tried
@@ -244,7 +258,8 @@ def test_domains_dns_bulkAddHosts():
 def test_domains_dns_delHost():
     api = Api(username, api_key, username, ip_address, sandbox=True)
     domain_name = test_register_domain()
-    api.domains_dns_setHosts(
+    
+    res = api.domains_dns_setHosts(
         domain_name,
         [{
             'HostName': '@',
@@ -257,7 +272,10 @@ def test_domains_dns_delHost():
             'Address': '1.2.3.4'
         }]
     )
-    api.domains_dns_delHost(
+    assert_equal(res['Domain'], domain_name)
+    ok_(is_true(res['IsSuccess']))
+    
+    res = api.domains_dns_delHost(
         domain_name,
         {
             'Name': 'test',
@@ -265,7 +283,9 @@ def test_domains_dns_delHost():
             'Address': '1.2.3.4'
         }
     )
-
+    assert_equal(res['Domain'], domain_name)
+    ok_(is_true(res['IsSuccess']))
+    
     hosts = api.domains_dns_getHosts(domain_name)
 
     # these might change

@@ -1,7 +1,7 @@
 import sys
 import time
 import requests  # pip install requests
-from xml.etree.ElementTree import fromstring
+from xml.etree.ElementTree import fromstring, Element
 
 inPy3k = sys.version_info[0] == 3
 
@@ -29,7 +29,10 @@ class ApiError(Exception):
         self.text = text
 
 
+# noinspection PyPep8Naming
 class Api(object):
+    ENDPOINTS = ENDPOINTS
+    
     # Follows API spec capitalization in variable names for consistency.
     def __init__(self, ApiUser, ApiKey, UserName, ClientIP,
                  sandbox=True, debug=True,
@@ -50,13 +53,55 @@ class Api(object):
         self,
         DomainName, FirstName, LastName,
         Address1, City, StateProvince, PostalCode, Country, Phone,
-        EmailAddress, Address2=None, years=1, WhoisGuard=False
+        EmailAddress, Address2=None, years=1, WhoisGuard=False,
+        OrganizationName=None, JobTitle=None, PromotionCode=None,
+        Nameservers=None, **user_payload
     ):
+        # type: (str, str, str, str, str, str, str, str, str, str, str, int, bool, str, str, str, str or list, any) -> dict
         """
         Registers a domain name with the given contact info.
         Example of a working phone number: +81.123123123
 
-        For simplicity assumes one person acts as all contact types."""
+        For simplicity assumes one person acts as all contact types.
+        
+        If you're registering a domain as a company/organisation, specify the company name in ``OrganizationName``,
+        and specify the job role of the person named in ``FirstName`` / ``LastName`` in ``JobTitle``
+        e.g. ``domains_create(FirstName='John', LastName='Doe', OrganizationName='ExampleCorp', JobTitle='Chief Technical Officer')``
+        
+        **Example Usage**::
+        
+            >>> api = Api('user', 'key', 'user', '12.34.56.78')
+            >>> res = api.domains_create(
+            ...     DomainName = 'somecooldomain.com',
+            ...     FirstName = 'Jack',
+            ...     LastName = 'Trotter',
+            ...     Address1 = 'Ridiculously Big Mansion, Yellow Brick Road',
+            ...     City = 'Tokushima',
+            ...     StateProvince = 'Tokushima',
+            ...     PostalCode = '771-0144',
+            ...     Country = 'Japan',
+            ...     Phone = '+81.123123123',
+            ...     EmailAddress = 'jack.trotter@example.com'
+            ... )
+            >>> print(res)
+            {
+                'Domain': 'somecooldomain.com', 'Registered': 'true', 'ChargedAmount': '12.1600',
+                'DomainID': '615026', 'OrderID': '2139371', 'TransactionID': '4139125',
+                'WhoisguardEnable': 'true', 'FreePositiveSSL': 'false', 'NonRealTimeDomain': 'false'
+            }
+        
+        **Automatically set nameservers on purchase**::
+            
+            >>> # For readability, we're not including the required contact information for these calls
+            >>> # You can specify Nameservers as either a list [] of nameservers as strings
+            >>> api.domains_create('anotherdomain.com', Nameservers=['ns1.example.com', 'ns2.example.com', 'ns3.example.com'])
+            >>> # OR you can specify them as a comma separated string - it's up to your preference
+            >>> # There is no difference in result whether you specify nameservers as a list or string
+            >>> api.domains_create('anotherdomain.com', Nameservers='ns1.example.com,ns2.example.com,ns3.example.com')
+        
+        :raises ApiError: When ``<Error />`` in the result is non-empty.
+        :return dict DomainCreateResult: The attributes of the result's ``<DomainCreateResult />`` as a dictionary
+        """
 
         contact_types = ['Registrant', 'Tech', 'Admin', 'AuxBilling']
 
@@ -70,7 +115,13 @@ class Api(object):
                 'AddFreeWhoisguard': 'yes',
                 'WGEnabled': 'yes',
             })
-
+        if PromotionCode:
+            extra_payload['PromotionCode'] = PromotionCode
+        if Nameservers:
+            if isinstance(Nameservers, (list, set, tuple)):
+                Nameservers = ','.join(Nameservers)
+            extra_payload['Nameservers'] = Nameservers
+        
         for contact_type in contact_types:
             extra_payload.update({
                 '%sFirstName' % contact_type: FirstName,
@@ -85,11 +136,31 @@ class Api(object):
             })
             if Address2:
                 extra_payload['%sAddress2' % contact_type] = Address2
+            if OrganizationName:
+                extra_payload['%sOrganizationName' % contact_type] = OrganizationName
+            if JobTitle:
+                extra_payload['%sJobTitle' % contact_type] = JobTitle
+        
+        # Merge in any user payload key:value's on top of our generated payload dictionary
+        extra_payload = {**extra_payload, **user_payload}
+        
+        xml = self._call('namecheap.domains.create', extra_payload)
+        return self.get_element_dict(xml, 'DomainCreateResult')
 
-        self._call('namecheap.domains.create', extra_payload)
+    @staticmethod
+    def get_element(element, element_name):
+        # type: (Element, str) -> Element
+        return element.find('.//{%(ns)s}%(el)s' % {'ns': NAMESPACE, 'el': element_name})
 
-    def _payload(self, Command, extra_payload={}):
+    @staticmethod
+    def get_element_dict(element, element_name):
+        # type: (Element, str) -> dict
+        return dict(Api.get_element(element, element_name).items())
+
+    def _payload(self, Command, extra_payload=None):
+        # type: (str, dict) -> (dict, dict)
         """Make dictionary for passing to requests.post"""
+        extra_payload = {} if extra_payload is None else extra_payload
         payload = {
             'ApiUser': self.ApiUser,
             'ApiKey': self.ApiKey,
@@ -104,7 +175,8 @@ class Api(object):
             extra_payload = {}
         return payload, extra_payload
 
-    def _fetch_xml(self, payload, extra_payload = None):
+    def _fetch_xml(self, payload, extra_payload=None):
+        # type: (dict, dict) -> Element
         """Make network call and return parsed XML element"""
         attempts_left = self.attempts_count
         while attempts_left > 0:
@@ -138,8 +210,10 @@ class Api(object):
 
         return xml
 
-    def _call(self, Command, extra_payload={}):
+    def _call(self, Command, extra_payload=None):
+        # type: (str, dict) -> Element
         """Call an API command"""
+        extra_payload = {} if extra_payload is None else extra_payload
         payload, extra_payload = self._payload(Command, extra_payload)
         xml = self._fetch_xml(payload, extra_payload)
         return xml
@@ -178,14 +252,17 @@ class Api(object):
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-default.aspx
     def domains_dns_setDefault(self, domain):
+        # type: (str) -> dict
         sld, tld = domain.split(".")
-        self._call("namecheap.domains.dns.setDefault", {
+        xml = self._call("namecheap.domains.dns.setDefault", {
             'SLD': sld,
             'TLD': tld
         })
-
+        return self.get_element_dict(xml, 'DomainDNSSetDefaultResult')
+    
     # https://www.namecheap.com/support/api/methods/domains/check.aspx
     def domains_check(self, domains):
+        # type: (str or list) -> dict
         """Checks the availability of domains.
 
         For example
@@ -303,6 +380,7 @@ class Api(object):
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-hosts.aspx
     def domains_dns_setHosts(self, domain, host_records):
+        # type: (str, list) -> dict
         """Sets the DNS host records for a domain.
 
         Example:
@@ -323,10 +401,11 @@ class Api(object):
             'SLD': sld,
             'TLD': tld
         })
-        self._call("namecheap.domains.dns.setHosts", extra_payload)
+        return self.get_element_dict(self._call("namecheap.domains.dns.setHosts", extra_payload), 'DomainDNSSetHostsResult')
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-custom.aspx
     def domains_dns_setCustom(self, domain, host_records):
+        # type: (str, dict) -> dict
         """Sets the domain to use the supplied set of nameservers.
 
         Example:
@@ -337,10 +416,11 @@ class Api(object):
         sld, tld = domain.split(".")
         extra_payload['SLD'] = sld
         extra_payload['TLD'] = tld
-        self._call("namecheap.domains.dns.setCustom", extra_payload)
+        return self.get_element_dict(self._call("namecheap.domains.dns.setCustom", extra_payload), 'DomainDNSSetCustomResult')
 
     # https://www.namecheap.com/support/api/methods/domains-dns/get-hosts.aspx
     def domains_dns_getHosts(self, domain):
+        # type: (str) -> list
         """Retrieves DNS host record settings. Note that the key names are different from those
         you use when setting the host records."""
         sld, tld = domain.split(".")
@@ -385,9 +465,10 @@ class Api(object):
             'SLD': sld,
             'TLD': tld
         })
-        self._call("namecheap.domains.dns.setHosts", extra_payload)
+        return self.get_element_dict(self._call("namecheap.domains.dns.setHosts", extra_payload), 'DomainDNSSetHostsResult')
 
     def domains_dns_delHost(self, domain, host_record):
+        # type: (str, dict) -> dict or bool
         """This method is absent in original API as well. It executes non-atomic
         remove operation over the host record which has the following Type,
         Hostname and Address.
@@ -436,7 +517,7 @@ class Api(object):
             'SLD': sld,
             'TLD': tld
         })
-        self._call("namecheap.domains.dns.setHosts", extra_payload)
+        return self.get_element_dict(self._call("namecheap.domains.dns.setHosts", extra_payload), 'DomainDNSSetHostsResult')
 
     # https://www.namecheap.com/support/api/methods/domains-dns/get-list.aspx
     def domains_getList(self, ListType=None, SearchTerm=None, PageSize=None, SortBy=None):
