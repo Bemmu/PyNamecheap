@@ -41,7 +41,8 @@ class Api(object):
         self.ClientIP = ClientIP
         self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
         self.debug = debug
-        self.payload_limit = 10  # After hitting this lenght limit script will move payload from POST params to POST data
+        # After hitting this lenght limit script will move payload from POST params to POST data
+        self.payload_limit = 10
         self.attempts_count = attempts_count
         self.attempts_delay = attempts_delay
 
@@ -104,12 +105,13 @@ class Api(object):
             extra_payload = {}
         return payload, extra_payload
 
-    def _fetch_xml(self, payload, extra_payload = None):
+    def _fetch_xml(self, payload, extra_payload=None):
         """Make network call and return parsed XML element"""
         attempts_left = self.attempts_count
         while attempts_left > 0:
             if extra_payload:
-                r = requests.post(self.endpoint, params=payload, data=extra_payload)
+                r = requests.post(
+                    self.endpoint, params=payload, data=extra_payload)
             else:
                 r = requests.post(self.endpoint, params=payload)
             if 200 <= r.status_code <= 299:
@@ -148,9 +150,11 @@ class Api(object):
         """When listing domain names, only one page is returned
         initially. The list needs to be paged through to see all.
         This iterator gets the next page when necessary."""
+
         def _get_more_results(self):
             xml = self.api._fetch_xml(self.payload)
-            xpath = './/{%(ns)s}CommandResponse/{%(ns)s}DomainGetListResult/{%(ns)s}Domain' % {'ns': NAMESPACE}
+            xpath = './/{%(ns)s}CommandResponse/{%(ns)s}DomainGetListResult/{%(ns)s}Domain' % {
+                'ns': NAMESPACE}
             domains = xml.findall(xpath)
             for domain in domains:
                 self.results.append(domain.attrib)
@@ -211,7 +215,8 @@ class Api(object):
         xpath = './/{%(ns)s}CommandResponse/{%(ns)s}DomainCheckResult' % {'ns': NAMESPACE}
         results = {}
         for check_result in xml.findall(xpath):
-            results[check_result.attrib['Domain']] = check_result.attrib['Available'] == 'true'
+            results[check_result.attrib['Domain']
+                    ] = check_result.attrib['Available'] == 'true'
         return results
 
     @classmethod
@@ -236,8 +241,10 @@ class Api(object):
             'cat3' : 'meow'
         }
         """
+
+        disallow_change = ['EmailType']
         return dict(sum([
-            [(k + str(i + 1), v) for k, v in d.items()] for i, d in enumerate(l)
+            [(k + str(i + 1), v) if k not in disallow_change else (k, v) for k, v in d.items()] for i, d in enumerate(l)
         ], []))
 
     @classmethod
@@ -291,14 +298,17 @@ class Api(object):
             ...
         }
         """
-        xml = self._call('namecheap.domains.getContacts', {'DomainName': DomainName})
+        xml = self._call('namecheap.domains.getContacts',
+                         {'DomainName': DomainName})
         xpath = './/{%(ns)s}CommandResponse/{%(ns)s}DomainContactsResult/*' % {'ns': NAMESPACE}
         results = {}
         for contact_type in xml.findall(xpath):
             fields_for_one_contact_type = {}
             for contact_detail in contact_type.findall('*'):
-                fields_for_one_contact_type[self._tag_without_namespace(contact_detail)] = contact_detail.text
-            results[self._tag_without_namespace(contact_type)] = fields_for_one_contact_type
+                fields_for_one_contact_type[self._tag_without_namespace(
+                    contact_detail)] = contact_detail.text
+            results[self._tag_without_namespace(
+                contact_type)] = fields_for_one_contact_type
         return results
 
     # https://www.namecheap.com/support/api/methods/domains-dns/set-hosts.aspx
@@ -317,7 +327,8 @@ class Api(object):
             }
         ])"""
 
-        extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records)
+        extra_payload = self._list_of_dictionaries_to_numbered_payload(
+            host_records)
         sld, tld = domain.split(".")
         extra_payload.update({
             'SLD': sld,
@@ -375,11 +386,13 @@ class Api(object):
         print("Remote: %i" % len(host_records_remote))
 
         host_records_remote.append(host_record)
-        host_records_remote = [self._elements_names_fix(x) for x in host_records_remote]
+        host_records_remote = [self._elements_names_fix(
+            x) for x in host_records_remote]
 
         print("To set: %i" % len(host_records_remote))
 
-        extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_remote)
+        extra_payload = self._list_of_dictionaries_to_numbered_payload(
+            host_records_remote)
         sld, tld = domain.split(".")
         extra_payload.update({
             'SLD': sld,
@@ -416,7 +429,8 @@ class Api(object):
             else:
                 host_records_new.append(r)
 
-        host_records_new = [self._elements_names_fix(x) for x in host_records_new]
+        host_records_new = [self._elements_names_fix(
+            x) for x in host_records_new]
 
         print("To set: %i" % len(host_records_new))
 
@@ -430,7 +444,8 @@ class Api(object):
             )
             return False
 
-        extra_payload = self._list_of_dictionaries_to_numbered_payload(host_records_new)
+        extra_payload = self._list_of_dictionaries_to_numbered_payload(
+            host_records_new)
         sld, tld = domain.split(".")
         extra_payload.update({
             'SLD': sld,
@@ -467,5 +482,6 @@ class Api(object):
             extra_payload['PageSize'] = PageSize
         if SortBy:
             extra_payload['SortBy'] = SortBy
-        payload, extra_payload = self._payload('namecheap.domains.getList', extra_payload)
+        payload, extra_payload = self._payload(
+            'namecheap.domains.getList', extra_payload)
         return self.LazyGetListIterator(self, payload)
