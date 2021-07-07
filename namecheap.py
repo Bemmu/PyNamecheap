@@ -473,3 +473,21 @@ class Api(object):
             extra_payload['SortBy'] = SortBy
         payload, extra_payload = self._payload('namecheap.domains.getList', extra_payload)
         return self.LazyGetListIterator(self, payload)
+
+    def domains_getInfo(self, DomainName, HostName=None):
+        """Returns information about the requested domain, for example
+        {
+            'Status': 'Ok',
+            'Id': '736542',
+            'DomainName': 'domain1.com',
+            'OwnerName': 'apiuser',
+            'IsOwner': 'true',
+            'IsPremium': 'true'
+        }"""
+        extra_payload = {'DomainName': DomainName}
+        if HostName:
+            extra_payload['HostName'] = HostName
+
+        xml = self._call('namecheap.domains.getInfo', extra_payload)
+        xpath = './/{%(ns)s}CommandResponse/{%(ns)s}DomainGetInfoResult' % {'ns': NAMESPACE}
+        return xml.find(xpath).attrib
