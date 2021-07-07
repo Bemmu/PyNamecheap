@@ -34,7 +34,8 @@ class Api(object):
     def __init__(self, ApiUser, ApiKey, UserName, ClientIP,
                  sandbox=True, debug=True,
                  attempts_count=DEFAULT_ATTEMPTS_COUNT,
-                 attempts_delay=DEFAULT_ATTEMPTS_DELAY):
+                 attempts_delay=DEFAULT_ATTEMPTS_DELAY,
+                 proxies=None):
         self.ApiUser = ApiUser
         self.ApiKey = ApiKey
         self.UserName = UserName
@@ -44,6 +45,7 @@ class Api(object):
         self.payload_limit = 10  # After hitting this lenght limit script will move payload from POST params to POST data
         self.attempts_count = attempts_count
         self.attempts_delay = attempts_delay
+        self.proxies = proxies
 
     # https://www.namecheap.com/support/api/methods/domains/create.aspx
     def domains_create(
@@ -108,10 +110,12 @@ class Api(object):
         """Make network call and return parsed XML element"""
         attempts_left = self.attempts_count
         while attempts_left > 0:
+            kwargs = {'params': payload}
             if extra_payload:
-                r = requests.post(self.endpoint, params=payload, data=extra_payload)
-            else:
-                r = requests.post(self.endpoint, params=payload)
+                kwargs['data'] = extra_payload
+            if self.proxies:
+                kwargs['proxies'] = self.proxies
+            r = requests.post(self.endpoint, **kwargs)
             if 200 <= r.status_code <= 299:
                 break
             if attempts_left <= 1:
