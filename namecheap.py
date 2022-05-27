@@ -41,7 +41,7 @@ class Api(object):
         self.ClientIP = ClientIP
         self.endpoint = ENDPOINTS['sandbox' if sandbox else 'production']
         self.debug = debug
-        self.payload_limit = 10  # After hitting this lenght limit script will move payload from POST params to POST data
+        self.payload_limit = 10  # After hitting this length limit script will move payload from POST params to POST data
         self.attempts_count = attempts_count
         self.attempts_delay = attempts_delay
 
