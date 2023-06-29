@@ -395,8 +395,8 @@ class Api(object):
         Example:
 
         api.domains_dns_delHost('example.com', {
-            "RecordType": "A",
-            "HostName": "test",
+            "Type": "A",
+            "Name": "test",
             "Address": "127.0.0.1"
         })
         """
